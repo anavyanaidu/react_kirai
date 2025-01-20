@@ -1,14 +1,65 @@
-import React from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft } from 'lucide-react';
-import { saveKiraiDetails } from '../services/api';
+import { ArrowLeft, Search } from 'lucide-react';
+import { useQuery } from 'react-query';
+import { saveKiraiDetails, getAllRiceMills, getAllDhalariDetails } from '../services/api';
 import toast from 'react-hot-toast';
-import { KiraiDetails } from '../types';
+import { KiraiDetails, RiceMill, DhalariDetails } from '../types';
 
 export default function KiraiForm() {
-  const { register, handleSubmit, formState: { errors } } = useForm<KiraiDetails>();
+  const { register, handleSubmit, setValue, formState: { errors } } = useForm<KiraiDetails>();
   const navigate = useNavigate();
+  const [riceMillSearch, setRiceMillSearch] = useState('');
+  const [dhalariSearch, setDhalariSearch] = useState('');
+  const [showRiceMillDropdown, setShowRiceMillDropdown] = useState(false);
+  const [showDhalariDropdown, setShowDhalariDropdown] = useState(false);
+  const riceMillRef = useRef<HTMLDivElement>(null);
+  const dhalariRef = useRef<HTMLDivElement>(null);
+
+  // Fetch rice mills
+  const { data: riceMills } = useQuery(
+    ['riceMills', riceMillSearch],
+    () => getAllRiceMills(riceMillSearch),
+    {
+      enabled: showRiceMillDropdown,
+    }
+  );
+
+  // Fetch dhalari details
+  const { data: dhalariList } = useQuery(
+    ['dhalari', dhalariSearch],
+    () => getAllDhalariDetails(dhalariSearch),
+    {
+      enabled: showDhalariDropdown,
+    }
+  );
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (riceMillRef.current && !riceMillRef.current.contains(event.target as Node)) {
+        setShowRiceMillDropdown(false);
+      }
+      if (dhalariRef.current && !dhalariRef.current.contains(event.target as Node)) {
+        setShowDhalariDropdown(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const handleRiceMillSelect = (riceMill: RiceMill) => {
+    setValue('riceMill', riceMill);
+    setShowRiceMillDropdown(false);
+    setRiceMillSearch(riceMill.name);
+  };
+
+  const handleDhalariSelect = (dhalari: DhalariDetails) => {
+    setValue('dhalariDetails', dhalari);
+    setShowDhalariDropdown(false);
+    setDhalariSearch(dhalari.name);
+  };
 
   const onSubmit = async (data: KiraiDetails) => {
     try {
@@ -73,7 +124,6 @@ export default function KiraiForm() {
               </div>
             </div>
           </div>
-
           {/* Mediator Details */}
           <div className="bg-white shadow px-4 py-5 sm:rounded-lg sm:p-6">
             <h3 className="text-lg font-medium leading-6 text-gray-900 mb-4">Mediator Details</h3>
@@ -97,55 +147,47 @@ export default function KiraiForm() {
             </div>
           </div>
 
-          {/* Notes & Instructions */}
-          <div className="bg-white shadow px-4 py-5 sm:rounded-lg sm:p-6">
-            <h3 className="text-lg font-medium leading-6 text-gray-900 mb-4">Additional Information</h3>
-            <div className="grid grid-cols-1 gap-6">
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Notes</label>
-                <textarea
-                  {...register('notes')}
-                  rows={3}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Instructions</label>
-                <textarea
-                  {...register('instructions')}
-                  rows={3}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                />
-              </div>
-            </div>
-          </div>
-
           {/* Rice Mill Details */}
-          <div className="bg-white shadow px-4 py-5 sm:rounded-lg sm:p-6">
+          <div className="bg-white shadow px-4 py-5 sm:rounded-lg sm:p-6" ref={riceMillRef}>
             <h3 className="text-lg font-medium leading-6 text-gray-900 mb-4">Rice Mill Details</h3>
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Mill ID</label>
-                <input
-                  {...register('riceMill.id')}
-                  type="text"
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                />
-              </div>
-              <div>
+              <div className="relative">
                 <label className="block text-sm font-medium text-gray-700">Mill Name</label>
-                <input
-                  {...register('riceMill.name')}
-                  type="text"
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                />
+                <div className="relative">
+                  <input
+                    type="text"
+                    value={riceMillSearch}
+                    onChange={(e) => {
+                      setRiceMillSearch(e.target.value);
+                      setShowRiceMillDropdown(true);
+                    }}
+                    onFocus={() => setShowRiceMillDropdown(true)}
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                    placeholder="Search rice mill..."
+                  />
+                  <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                </div>
+                {showRiceMillDropdown && riceMills && riceMills.length > 0 && (
+                  <div className="absolute z-10 mt-1 w-full bg-white shadow-lg rounded-md py-1 text-base ring-1 ring-black ring-opacity-5 overflow-auto max-h-60">
+                    {riceMills.map((mill) => (
+                      <div
+                        key={mill.id}
+                        className="cursor-pointer hover:bg-gray-100 px-4 py-2"
+                        onClick={() => handleRiceMillSelect(mill)}
+                      >
+                        {mill.name}
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700">Phone</label>
                 <input
                   {...register('riceMill.phone')}
                   type="text"
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm bg-gray-50"
+                  readOnly
                 />
               </div>
               <div>
@@ -153,7 +195,8 @@ export default function KiraiForm() {
                 <input
                   {...register('riceMill.contactPerson')}
                   type="text"
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm bg-gray-50"
+                  readOnly
                 />
               </div>
               <div>
@@ -161,7 +204,8 @@ export default function KiraiForm() {
                 <input
                   {...register('riceMill.location')}
                   type="text"
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm bg-gray-50"
+                  readOnly
                 />
               </div>
               <div>
@@ -169,12 +213,69 @@ export default function KiraiForm() {
                 <input
                   {...register('riceMill.gst')}
                   type="text"
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm bg-gray-50"
+                  readOnly
                 />
               </div>
             </div>
           </div>
 
+          {/* Dhalari Details */}
+          <div className="bg-white shadow px-4 py-5 sm:rounded-lg sm:p-6" ref={dhalariRef}>
+            <h3 className="text-lg font-medium leading-6 text-gray-900 mb-4">Dhalari Details</h3>
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+              <div className="relative">
+                <label className="block text-sm font-medium text-gray-700">Name</label>
+                <div className="relative">
+                  <input
+                    type="text"
+                    value={dhalariSearch}
+                    onChange={(e) => {
+                      setDhalariSearch(e.target.value);
+                      setShowDhalariDropdown(true);
+                    }}
+                    onFocus={() => setShowDhalariDropdown(true)}
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                    placeholder="Search dhalari..."
+                  />
+                  <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                </div>
+                {showDhalariDropdown && dhalariList && dhalariList.length > 0 && (
+                  <div className="absolute z-10 mt-1 w-full bg-white shadow-lg rounded-md py-1 text-base ring-1 ring-black ring-opacity-5 overflow-auto max-h-60">
+                    {dhalariList.map((dhalari) => (
+                      <div
+                        key={dhalari.id}
+                        className="cursor-pointer hover:bg-gray-100 px-4 py-2"
+                        onClick={() => handleDhalariSelect(dhalari)}
+                      >
+                        {dhalari.name}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Rythu Name</label>
+                <input
+                  {...register('dhalariDetails.rythuName')}
+                  type="text"
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm bg-gray-50"
+                  readOnly
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Location</label>
+                <input
+                  {...register('dhalariDetails.location')}
+                  type="text"
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm bg-gray-50"
+                  readOnly
+                />
+              </div>
+            </div>
+          </div>
+
+   
           {/* Loading Details */}
           <div className="bg-white shadow px-4 py-5 sm:rounded-lg sm:p-6">
             <h3 className="text-lg font-medium leading-6 text-gray-900 mb-4">Loading Details</h3>
@@ -245,46 +346,6 @@ export default function KiraiForm() {
               </div>
             </div>
           </div>
-
-          {/* Dhalari Details */}
-          <div className="bg-white shadow px-4 py-5 sm:rounded-lg sm:p-6">
-            <h3 className="text-lg font-medium leading-6 text-gray-900 mb-4">Dhalari Details</h3>
-            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-              <div>
-                <label className="block text-sm font-medium text-gray-700">ID</label>
-                <input
-                  {...register('dhalariDetails.id')}
-                  type="text"
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Name</label>
-                <input
-                  {...register('dhalariDetails.name')}
-                  type="text"
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Rythu Name</label>
-                <input
-                  {...register('dhalariDetails.rythuName')}
-                  type="text"
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Location</label>
-                <input
-                  {...register('dhalariDetails.location')}
-                  type="text"
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                />
-              </div>
-            </div>
-          </div>
-
           {/* Lorry Details */}
           <div className="bg-white shadow px-4 py-5 sm:rounded-lg sm:p-6">
             <h3 className="text-lg font-medium leading-6 text-gray-900 mb-4">Lorry Details</h3>
@@ -400,9 +461,7 @@ export default function KiraiForm() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700">Driver Allowances Continuing with the KiraiForm.tsx file content exactly where we left off:
-
-                </label>
+                <label className="block text-sm font-medium text-gray-700">Driver Allowances</label>
                 <input
                   {...register('kiraiDetails.driverAllowances')}
                   type="number"
@@ -441,7 +500,7 @@ export default function KiraiForm() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700">Total</label>
+                <label className="block text-sm font-medium text-gray-700">Total Weight</label>
                 <input
                   {...register('weightageDetails.total')}
                   type="number"
@@ -449,7 +508,7 @@ export default function KiraiForm() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700">Empty</label>
+                <label className="block text-sm font-medium text-gray-700">Empty Weight</label>
                 <input
                   {...register('weightageDetails.empty')}
                   type="number"
@@ -466,7 +525,25 @@ export default function KiraiForm() {
               </div>
             </div>
           </div>
+          
+             {/* Notes & Instructions */}
 
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Notes</label>
+                <textarea
+                  {...register('notes')}
+                  rows={3}
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Instructions</label>
+                <textarea
+                  {...register('instructions')}
+                  rows={3}
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                />
+              </div>
           <div className="flex justify-end">
             <button
               type="button"

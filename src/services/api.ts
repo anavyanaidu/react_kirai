@@ -18,6 +18,18 @@ export const login = async (email: string, password: string): Promise<LoginRespo
   return response.data;
 };
 
+// Add new API calls for autocomplete
+export const searchRiceMills = async (query: string) => {
+  const response = await api.get(`/v1/kirai/ricemills?search=${query}`);
+  return response.data;
+};
+
+export const searchDhalaris = async (query: string) => {
+  const response = await api.get(`/v1/kirai/dhalaris?search=${query}`); 
+  return response.data;
+};
+
+
 export const saveKiraiDetails = async (data: KiraiDetails): Promise<KiraiDetails> => {
   const response = await api.post('/v1/kirai/saveKiraiDetails', data);
   return response.data;
@@ -31,5 +43,25 @@ export const getAllKiraiDetails = async (params: {
   return response.data;
 };
 
-// http://localhost:8009/v1/kirai/getKiraiDetails?page=0&size=10
-// http://localhost:8009/v1/kirai/getAllKiraiDetails?page=0&size=10q
+export const getAllRiceMills = async (search?: string): Promise<RiceMill[]> => {
+  const response = await api.get('/v1/kirai/getAllRiceMills', {
+    params: { search }
+  });
+  return response.data;
+};
+
+export const getAllDhalariDetails = async (search?: string): Promise<DhalariDetails[]> => {
+  const response = await api.get('/v1/kirai/getAllDhalariDetails', {
+    params: { search }
+  });
+  return response.data;
+};
+
+export const filterKiraiDetails = async (fieldName: string, value: string): Promise<KiraiDetails[]> => {
+  const response = await api.get(`/v1/kirai/filter`, {
+    params: { fieldName, value }
+  });
+  return response.data;
+};
+
+

@@ -30,6 +30,22 @@ export interface Token {
   expires: string;
 }
 
+export interface RiceMill {
+  id: string;
+  name: string;
+  phone: string;
+  contactPerson: string;
+  location: string;
+  gst: string;
+}
+
+export interface DhalariDetails {
+  id: string;
+  name: string;
+  rythuName: string;
+  location: string;
+}
+
 export interface KiraiDetails {
   loadingDate: string;
   reachedDate: string;
@@ -39,14 +55,7 @@ export interface KiraiDetails {
   };
   notes: string;
   instructions: string;
-  riceMill: {
-    id: string;
-    name: string;
-    phone: string;
-    contactPerson: string;
-    location: string;
-    gst: string;
-  };
+  riceMill: RiceMill;
   loadingDetails: {
     perBag: number;
     deliveryType: string;
@@ -57,12 +66,7 @@ export interface KiraiDetails {
     commission: number;
     totalRate: number;
   };
-  dhalariDetails: {
-    id: string;
-    name: string;
-    rythuName: string;
-    location: string;
-  };
+  dhalariDetails: DhalariDetails;
   lorryDetails: {
     driverName: string;
     driverLocation: string;
