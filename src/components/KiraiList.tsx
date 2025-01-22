@@ -1,13 +1,14 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useQuery } from 'react-query';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Search, Printer } from 'lucide-react';
+import { ArrowLeft, Search, Printer, Eye } from 'lucide-react';
 import { filterKiraiDetails, getAllKiraiDetails } from '../services/api';
 import { KiraiDetails } from '../types';
 
+
 const searchFields = [
   { label: 'KL Number', value: '_id' },
-  { label: 'Rice Mill Name', value: 'riceMill.name' },
+  { label: 'Rice Mill Name', value: 'ricemill.name' },
   { label: 'Dhalari Name', value: 'dhalariDetails.name' }
 ];
 
@@ -21,6 +22,14 @@ export default function KiraiList() {
   const [selectedKirai, setSelectedKirai] = useState<KiraiDetails | null>(null);
   const [showPrintModal, setShowPrintModal] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
+  const [showViewModal, setShowViewModal] = useState(false);
+
+
+
+  const handleView = (kirai: KiraiDetails) => {
+    setSelectedKirai(kirai);
+    setShowViewModal(true);
+  };
 
   // Query for paginated data
   const { data: paginatedData, isLoading: isLoadingPaginated } = useQuery(
@@ -32,18 +41,17 @@ export default function KiraiList() {
   );
 
   // Query for search results
-  const { data: searchResults, isLoading: isLoadingSearch, refetch: refetchSearchResults } = useQuery(
+  const { data: searchResults, isLoading: isLoadingSearch } = useQuery(
     ['kiraiSearch', selectedField, searchValue],
     () => filterKiraiDetails(selectedField, searchValue),
     {
-      enabled: false,
+      enabled: isSearching,
     }
   );
 
   const handleSearch = () => {
     if (searchValue) {
       setIsSearching(true);
-      refetchSearchResults();
     } else {
       setIsSearching(false);
     }
@@ -59,218 +67,129 @@ export default function KiraiList() {
     setShowPrintModal(true);
   };
 
-  // const printDetails = () => {
-  //   const printWindow = window.open('', '_blank');
-  //   if (printWindow && selectedKirai) {
-  //     printWindow.document.write(`
-  //       <html>
-  //         <head>
-  //           <title>Kirai Details - ${selectedKirai.klno}</title>
-  //           <style>
-  //             body { font-family: Arial, sans-serif; padding: 20px; }
-  //             .header { text-align: center; margin-bottom: 30px; }
-  //             .detail-row { margin: 10px 0; }
-  //             .label { font-weight: bold; min-width: 150px; display: inline-block; }
-  //           </style>
-  //         </head>
-  //         <body>
-  //           <div class="header">
-  //             <h1>Kirai Details</h1>
-  //             <h2>KL Number: ${selectedKirai.klno}</h2>
-  //           </div>
-  //           ${Object.entries(selectedKirai).map(([key, value]) => {
-  //             if (typeof value === 'object') {
-  //               return Object.entries(value).map(([subKey, subValue]) => `
-  //                 <div class="detail-row">
-  //                   <span class="label">${key}.${subKey}:</span>
-  //                   <span>${subValue}</span>
-  //                 </div>
-  //               `).join('');
-  //             }
-  //             return `
-  //               <div class="detail-row">
-  //                 <span class="label">${key}:</span>
-  //                 <span>${value}</span>
-  //               </div>
-  //             `;
-  //           }).join('')}
-  //         </body>
-  //       </html>
-  //     `);
-  //     printWindow.document.close();
-  //     printWindow.print();
-  //   }
-  // };
- 
- 
-  const order = {
-    riceMill: [  'contactPerson','location','phone','gst'], // Subkey order for riceMill
-    dhalariDetails: ['name', 'rythuName', 'location'], // Subkey order for dhalariDetails
-    mediator: ['name', 'number'], 
-    loadingDate: true,
-    reachedDate: true,
-    weightageDetails: ['type','billNo','total', 'empty', 'itemWeight'], // Subkey order for weightageDetails
-    loadingDetails: ['perBag', 'deliveryType', 'riceType', 'bagsCount', 'waymentType', 'loadingRate', 'commission', 'totalRate'], // Subkey order for loadingDetails
-    lorryDetails: ['driverName', 'driverLocation', 'ownerName', 'ownerLocation', 'lorryNumber', 'driverNumber'],
-    transportOffices: ['name', 'phoneNumber'], // Subkey order for transportOffices
-    kiraiDetails: ['type', 'perTon', 'advance', 'balance', 'driverAllowances'],
-    notes: true, 
-    instructions: true
-  };
-  
-  
- 
- 
   const printDetails = () => {
     const printWindow = window.open('', '_blank');
     if (printWindow && selectedKirai) {
-      const aliases: Record<string, any> = {
-        klno: "KL NO",
-        riceMill: {
-          id: "Rice Mill ID",
-          name: "Rice Mill Name",
-          phone: "Rice Mill Phone",
-          contactPerson: "Contact Person",
-          location: "Location",
-          gst: "GST Number"
-        },
-        loadingDetails: {
-          perBag: "Per Bag Rate",
-          deliveryType: "Delivery Type",
-          riceType: "Rice Type",
-          bagCount: "Bag Count",
-          waymentType: "Wayment Type",
-          loadingRate: "Loading Rate",
-          commission: "Commission",
-          totalRate: "Total Rate"
-        },
-        dhalariDetails: {
-          id: "Dhalari ID",
-          name: "Dhalari Name",
-          rythuName: "Rythu Name",
-          location: "Location"
-        },
-        lorryDetails: {
-          driverName: "Driver Name",
-          driverLocation: "Driver Location",
-          ownerName: "Owner Name",
-          ownerLocation: "Owner Location",
-          lorryNumber: "Lorry Number",
-          driverNumber: "Driver Number"
-        },
-        weightageDetails: {
-          id: "Weightage ID",
-          billNumber: "Bill Number",
-          type: "Weightage Type",
-          total: "Total Weight",
-          empty: "Empty Weight",
-          itemWeight: "Item Weight"
-        },
-        mediator: {
-          name: "Mediator Name",
-          number: "Mediator Number"
-        },
-        notes: "Notes",
-        instructions: "Instructions",
-        transportOffices: {
-          name: "Transport Office Name",
-          phoneNumber: "Transport Office Phone"
-        },
-        kiraiDetails: {
-          type: "Kirai Type",
-          perTon: "Per Ton Rate",
-          advance: "Advance Amount",
-          balance: "Balance Amount",
-          driverAllowances: "Driver Allowances"
-        }
-      };
-  
-      const getAlias = (key: string, subKey: string | null = null): string => {
-        if (subKey && aliases[key]) {
-          return aliases[key][subKey] || `${key}.${subKey}`;
-        }
-        return aliases[key] || key;
-      };
-  
       printWindow.document.write(`
         <html>
           <head>
-            <title>Kirai Letter - ${selectedKirai.klno}</title>
+            <title>Kirai Details - ${selectedKirai.klno}</title>
             <style>
-              body { font-family: Arial, sans-serif; padding: 20px; line-height: 1.8; }
-              .header { text-align: center; margin-bottom: 30px; }
-              .detail-row {
-                display: flex;
-                justify-content: space-between;
-                margin-bottom: 10px;
-                border-bottom: 1px dashed #ccc;
-                padding-bottom: 5px;
-              }
-              .label {
-                font-weight: bold;
-                width: 40%;
-                text-align: left;
-                padding-right: 10px;
-              }
-              .value {
-                width: 55%;
-                text-align: left;
-              }
-              .colon {
-                padding: 0 5px;
+              body { font-family: Arial, sans-serif; padding: 20px; }
+              .header { margin-bottom: 30px; }
+              .header-row { display: flex; justify-content: space-between; margin-bottom: 10px; }
+              .detail-section { margin-bottom: 20px; }
+              .columns { display: flex; justify-content: space-between; }
+              .column { width: 48%; }
+              .detail-row { margin: 8px 0; }
+              .label { font-weight: bold; }
+              @media print {
+                body { padding: 0; }
+                button { display: none; }
               }
             </style>
           </head>
           <body>
             <div class="header">
-              <h2>Kirai Letter</h2>
-              <h3>Sri Vinayaka Commission Agency</h3>
+              <div class="header-row">
+                <div>
+                  <div class="detail-row">
+                    <span class="label">KL No:</span>
+                    <span>${selectedKirai.klno}</span>
+                  </div>
+                  <div class="detail-row">
+                    <span class="label">Rice Mill Name:</span>
+                    <span>${selectedKirai.riceMill.name}</span>
+                  </div>
+                </div>
+                <div>
+                  <div class="detail-row">
+                    <span class="label">Date:</span>
+                    <span>${selectedKirai.loadingDate}</span>
+                  </div>
+                </div>
+              </div>
             </div>
-  
-            <!-- KL Number -->
-            <div class="detail-row">
-              <span class="label">${getAlias('klno')}</span>
-              <span class="colon">:</span>
-              <span class="value">${selectedKirai.klno || 'N/A'}</span>
+
+            <div class="columns">
+              <div class="column">
+                <div class="detail-row">
+                  <span class="label">1. Waybill No:</span>
+                  <span>10</span>
+                </div>
+                <div class="detail-row">
+                  <span class="label">2. Asami Name:</span>
+                  <span>${selectedKirai.dhalariDetails.rythuName}</span>
+                </div>
+                <div class="detail-row">
+                  <span class="label">3. Dhalari Details:</span>
+                  <span>${selectedKirai.dhalariDetails.name}, ${selectedKirai.dhalariDetails.location}</span>
+                </div>
+                <div class="detail-row">
+                  <span class="label">4. Rice Type:</span>
+                  <span>${selectedKirai.loadingDetails.riceType}</span>
+                </div>
+                <div class="detail-row">
+                  <span class="label">5. Bag Count:</span>
+                  <span>${selectedKirai.loadingDetails.bagCount}</span>
+                </div>
+                <div class="detail-row">
+                  <span class="label">6. Wayment Type:</span>
+                  <span>${selectedKirai.loadingDetails.waymentType}</span>
+                </div>
+                <div class="detail-row">
+                  <span class="label">7. Lorry No:</span>
+                  <span>${selectedKirai.lorryDetails.lorryNumber}</span>
+                </div>
+                <div class="detail-row">
+                  <span class="label">8. Lorry Owner:</span>
+                  <span>${selectedKirai.lorryDetails.ownerName}, ${selectedKirai.lorryDetails.ownerLocation}</span>
+                </div>
+                <div class="detail-row">
+                  <span class="label">9. Lorry Driver:</span>
+                  <span>${selectedKirai.lorryDetails.driverName}, ${selectedKirai.lorryDetails.driverLocation}, ${selectedKirai.lorryDetails.driverNumber}</span>
+                </div>
+                <div class="detail-row">
+                  <span class="label">10. Per Ton:</span>
+                  <span>${selectedKirai.kiraiDetails.perTon}</span>
+                </div>
+                <div class="detail-row">
+                  <span class="label">11. Advance:</span>
+                  <span>${selectedKirai.kiraiDetails.advance}</span>
+                </div>
+                <div class="detail-row">
+                  <span class="label">12. Balance:</span>
+                  <span>${selectedKirai.kiraiDetails.balance}</span>
+                </div>
+                <div class="detail-row">
+                  <span class="label">13. Total:</span>
+                  <span>${selectedKirai.weightageDetails.total}</span>
+                </div>
+                <div class="detail-row">
+                  <span class="label">14. Empty:</span>
+                  <span>${selectedKirai.weightageDetails.empty}</span>
+                </div>
+                <div class="detail-row">
+                  <span class="label">15. Item Weight:</span>
+                  <span>${selectedKirai.weightageDetails.itemWeight}</span>
+                </div>
+              </div>
+
+              <div class="column">
+                <div class="detail-row">
+                  <span class="label">Per Bag:</span>
+                  <span>${selectedKirai.loadingDetails.perBag}</span>
+                </div>
+                <div class="detail-row">
+                  <span class="label">Commission:</span>
+                  <span>${selectedKirai.loadingDetails.commission}</span>
+                </div>
+                <div class="detail-row">
+                  <span class="label">Total Rate:</span>
+                  <span>${selectedKirai.loadingDetails.totalRate}</span>
+                </div>
+              </div>
             </div>
-  
-            <!-- Rice Mill Name -->
-            <div class="detail-row">
-              <span class="label">${getAlias('riceMill', 'name')}</span>
-              <span class="colon">:</span>
-              <span class="value">${selectedKirai.riceMill?.name || 'N/A'}</span>
-            </div>
-  
-            <!-- Additional Details -->
-            <p>Below are the detailed details of the bill:</p>
-            ${Object.entries(order)
-              .map(([key, subkeys]) => {
-                if (subkeys === true) {
-                  // Top-level keys
-                  return `
-                    <div class="detail-row">
-                      <span class="label">${getAlias(key)}</span>
-                      <span class="colon">:</span>
-                      <span class="value">${selectedKirai[key] || 'N/A'}</span>
-                    </div>
-                  `;
-                } else if (Array.isArray(subkeys) && (selectedKirai as any)[key]) {
-                  // Ordered subkeys
-                  return subkeys
-                    .map(
-                      (subKey) => `
-                        <div class="detail-row">
-                          <span class="label">${getAlias(key, subKey)}</span>
-                          <span class="colon">:</span>
-                          <span class="value">${(selectedKirai as any)[key]?.[subKey] || 'N/A'}</span>
-                        </div>
-                      `
-                    )
-                    .join('');
-                }
-                return ''; // Ignore keys not in order
-              })
-              .join('')}
           </body>
         </html>
       `);
@@ -278,10 +197,6 @@ export default function KiraiList() {
       printWindow.print();
     }
   };
-  
-  
-  
-
 
   const displayData = isSearching ? searchResults : paginatedData;
   const isLoading = isLoadingPaginated || isLoadingSearch;
@@ -390,12 +305,19 @@ export default function KiraiList() {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                       <button
+                        onClick={() => handleView(item)}
+                        className="text-indigo-600 hover:text-indigo-900 mr-2"
+                      >
+                        <Eye className="h-5 w-5" />
+                      </button>
+                      <button
                         onClick={() => handlePrint(item)}
                         className="text-indigo-600 hover:text-indigo-900"
                       >
                         <Printer className="h-5 w-5" />
                       </button>
                     </td>
+
                   </tr>
                 ))}
               </tbody>
@@ -429,7 +351,7 @@ export default function KiraiList() {
           <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center p-4">
             <div className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto p-6">
               <div className="flex justify-between items-center mb-6">
-                <h3 className="text-lg font-medium text-gray-900">Kirai Details - {selectedKirai.klno}</h3>
+                <h3 className="text-lg font-medium text-gray-900">Print Preview - {selectedKirai.klno}</h3>
                 <div className="flex gap-2">
                   <button
                     onClick={printDetails}
@@ -445,34 +367,63 @@ export default function KiraiList() {
                   </button>
                 </div>
               </div>
+            </div>
+          </div>
+        )}
 
-              <div className="space-y-4">
-                {Object.entries(selectedKirai).map(([key, value]) => {
-                  if (typeof value === 'object') {
-                    return (
-                      <div key={key} className="border-t pt-4">
-                        <h4 className="font-medium text-gray-900 mb-2">{key}</h4>
-                        {Object.entries(value).map(([subKey, subValue]) => (
-                          <div key={`${key}-${subKey}`} className="grid grid-cols-2 gap-4 mb-2">
-                            <span className="text-gray-600">{subKey}:</span>
-                            <span>{String(subValue)}</span>
+        {/*View Modle*/}
+        {showViewModal && selectedKirai && (
+          <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center p-4">
+            <div className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto p-6">
+              <div className="flex justify-between items-center mb-6">
+                <h3 className="text-lg font-medium text-gray-900">
+                  View Details - {selectedKirai.klno}
+                </h3>
+                <button
+                  onClick={() => setShowViewModal(false)}
+                  className="bg-gray-200 px-4 py-2 text-gray-800 rounded-md hover:bg-gray-300"
+                >
+                  Close
+                </button>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {Object.entries(selectedKirai).map(([key, value]) => (
+                  <div key={key} className="bg-gray-100 p-4 rounded-md">
+                    <label className="block text-sm font-medium text-gray-700 capitalize">
+                      {key.replace(/([A-Z])/g, ' $1')} {/* Format camelCase to readable text */}
+                    </label>
+                    {typeof value === 'object' && value !== null ? (
+                      // If the value is an object, render its nested properties
+                      <div className="mt-1 text-sm text-gray-900 whitespace-pre-wrap">
+                        {Object.entries(value).map(([nestedKey, nestedValue]) => (
+                          <div key={nestedKey}>
+                            <span className="font-bold">{nestedKey.replace(/([A-Z])/g, ' $1')}: </span>
+                            {typeof nestedValue === 'object' && nestedValue !== null
+                              ? JSON.stringify(nestedValue, null, 2)
+                              : String(nestedValue)}
                           </div>
                         ))}
                       </div>
-                    );
-                  }
-                  return (
-                    <div key={key} className="grid grid-cols-2 gap-4">
-                      <span className="text-gray-600">{key}:</span>
-                      <span>{String(value)}</span>
-                    </div>
-                  );
-                })}
+                    ) : (
+                      // Render primitive values directly
+                      <p className="mt-1 text-sm text-gray-900">{String(value)}</p>
+                    )}
+                  </div>
+                ))}
               </div>
             </div>
           </div>
         )}
+
+
+
+
+
+
+
+
       </div>
     </div>
   );
 }
+

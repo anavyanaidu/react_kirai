@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Search } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 import { useQuery } from 'react-query';
 import { saveKiraiDetails, getAllRiceMills, getAllDhalariDetails } from '../services/api';
 import toast from 'react-hot-toast';
@@ -17,23 +17,9 @@ export default function KiraiForm() {
   const riceMillRef = useRef<HTMLDivElement>(null);
   const dhalariRef = useRef<HTMLDivElement>(null);
 
-  // Fetch rice mills
-  const { data: riceMills } = useQuery(
-    ['riceMills', riceMillSearch],
-    () => getAllRiceMills(riceMillSearch),
-    {
-      enabled: showRiceMillDropdown,
-    }
-  );
-
-  // Fetch dhalari details
-  const { data: dhalariList } = useQuery(
-    ['dhalari', dhalariSearch],
-    () => getAllDhalariDetails(dhalariSearch),
-    {
-      enabled: showDhalariDropdown,
-    }
-  );
+  // Fetch rice mills and dhalari details
+  const { data: riceMills } = useQuery(['riceMills'], getAllRiceMills, { enabled: showRiceMillDropdown });
+  const { data: dhalariList } = useQuery(['dhalari'], getAllDhalariDetails, { enabled: showDhalariDropdown });
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -61,6 +47,17 @@ export default function KiraiForm() {
     setDhalariSearch(dhalari.name);
   };
 
+  const handleKeyDown = (e: React.KeyboardEvent, type: 'riceMill' | 'dhalari') => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      if (type === 'riceMill') {
+        setShowRiceMillDropdown(false);
+      } else {
+        setShowDhalariDropdown(false);
+      }
+    }
+  };
+
   const onSubmit = async (data: KiraiDetails) => {
     try {
       await saveKiraiDetails(data);
@@ -72,495 +69,217 @@ export default function KiraiForm() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-4xl mx-auto">
-        <div className="flex items-center mb-8">
-          <button
-            onClick={() => navigate('/dashboard')}
-            className="mr-4 text-gray-600 hover:text-gray-900"
-          >
-            <ArrowLeft className="h-6 w-6" />
+    <div className="min-h-screen bg-gray-50 py-4 px-4">
+      <div className="max-w-7xl mx-auto">
+        <div className="flex items-center mb-4">
+          <button onClick={() => navigate('/dashboard')} className="mr-4 text-gray-600 hover:text-gray-900">
+            <ArrowLeft className="h-5 w-5" />
           </button>
-          <h2 className="text-3xl font-bold text-gray-900">Kirai Registration Form</h2>
+          <h2 className="text-xl font-bold text-gray-900">Kirai Registration</h2>
         </div>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
-          {/* KL Number (Mandatory) */}
-          <div className="bg-white shadow px-4 py-5 sm:rounded-lg sm:p-6">
-            <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                KL Number *
-              </label>
-              <input
-                {...register('klno', { required: 'KL Number is required' })}
-                type="text"
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-              />
-              {errors.klno && (
-                <p className="mt-1 text-sm text-red-600">{errors.klno.message}</p>
-              )}
-            </div>
-          </div>
-
-          {/* Basic Details */}
-          <div className="bg-white shadow px-4 py-5 sm:rounded-lg sm:p-6">
-            <h3 className="text-lg font-medium leading-6 text-gray-900 mb-4">Basic Details</h3>
-            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Loading Date</label>
-                <input
-                  {...register('loadingDate')}
-                  type="date"
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Reached Date</label>
-                <input
-                  {...register('reachedDate')}
-                  type="date"
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                />
-              </div>
-            </div>
-          </div>
-          {/* Mediator Details */}
-          <div className="bg-white shadow px-4 py-5 sm:rounded-lg sm:p-6">
-            <h3 className="text-lg font-medium leading-6 text-gray-900 mb-4">Mediator Details</h3>
-            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Name</label>
-                <input
-                  {...register('mediator.name')}
-                  type="text"
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Number</label>
-                <input
-                  {...register('mediator.number')}
-                  type="text"
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Rice Mill Details */}
-          <div className="bg-white shadow px-4 py-5 sm:rounded-lg sm:p-6" ref={riceMillRef}>
-            <h3 className="text-lg font-medium leading-6 text-gray-900 mb-4">Rice Mill Details</h3>
-            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-              <div className="relative">
-                <label className="block text-sm font-medium text-gray-700">Mill Name</label>
-                <div className="relative">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Left Column */}
+            <div className="space-y-4">
+              {/* KL Number */}
+              <div className="bg-white p-4 rounded-lg shadow-sm">
+                <div className="flex items-center space-x-2">
+                  <label className="text-sm font-medium text-gray-700 whitespace-nowrap">KL Number *</label>
                   <input
+                    {...register('klno', { required: 'Required' })}
                     type="text"
-                    value={riceMillSearch}
-                    onChange={(e) => {
-                      setRiceMillSearch(e.target.value);
-                      setShowRiceMillDropdown(true);
-                    }}
-                    onFocus={() => setShowRiceMillDropdown(true)}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                    placeholder="Search rice mill..."
+                    className="flex-1 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm"
                   />
-                  <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                 </div>
-                {showRiceMillDropdown && riceMills && riceMills.length > 0 && (
-                  <div className="absolute z-10 mt-1 w-full bg-white shadow-lg rounded-md py-1 text-base ring-1 ring-black ring-opacity-5 overflow-auto max-h-60">
-                    {riceMills.map((mill) => (
-                      <div
-                        key={mill.id}
-                        className="cursor-pointer hover:bg-gray-100 px-4 py-2"
-                        onClick={() => handleRiceMillSelect(mill)}
-                      >
-                        {mill.name}
-                      </div>
-                    ))}
-                  </div>
-                )}
+                {errors.klno && <p className="mt-1 text-xs text-red-600">{errors.klno.message}</p>}
               </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Phone</label>
-                <input
-                  {...register('riceMill.phone')}
-                  type="text"
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm bg-gray-50"
-                  readOnly
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Contact Person</label>
-                <input
-                  {...register('riceMill.contactPerson')}
-                  type="text"
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm bg-gray-50"
-                  readOnly
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Location</label>
-                <input
-                  {...register('riceMill.location')}
-                  type="text"
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm bg-gray-50"
-                  readOnly
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">GST</label>
-                <input
-                  {...register('riceMill.gst')}
-                  type="text"
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm bg-gray-50"
-                  readOnly
-                />
-              </div>
-            </div>
-          </div>
 
-          {/* Dhalari Details */}
-          <div className="bg-white shadow px-4 py-5 sm:rounded-lg sm:p-6" ref={dhalariRef}>
-            <h3 className="text-lg font-medium leading-6 text-gray-900 mb-4">Dhalari Details</h3>
-            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-              <div className="relative">
-                <label className="block text-sm font-medium text-gray-700">Name</label>
-                <div className="relative">
-                  <input
-                    type="text"
-                    value={dhalariSearch}
-                    onChange={(e) => {
-                      setDhalariSearch(e.target.value);
-                      setShowDhalariDropdown(true);
-                    }}
-                    onFocus={() => setShowDhalariDropdown(true)}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                    placeholder="Search dhalari..."
-                  />
-                  <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+              {/* Basic Details */}
+              <div className="bg-white p-4 rounded-lg shadow-sm space-y-3">
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <label className="text-xs text-gray-700">Loading Date</label>
+                    <input
+                      {...register('loadingDate')}
+                      type="date"
+                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm"
+                      defaultValue={new Date().toISOString().split('T')[0]} // Set default value to current date
+                    />
+                  </div>
+
+                  <div>
+                    <label className="text-xs text-gray-700">Reached Date</label>
+                    <input {...register('reachedDate')} type="date" className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm" />
+                  </div>
                 </div>
-                {showDhalariDropdown && dhalariList && dhalariList.length > 0 && (
-                  <div className="absolute z-10 mt-1 w-full bg-white shadow-lg rounded-md py-1 text-base ring-1 ring-black ring-opacity-5 overflow-auto max-h-60">
-                    {dhalariList.map((dhalari) => (
-                      <div
-                        key={dhalari.id}
-                        className="cursor-pointer hover:bg-gray-100 px-4 py-2"
-                        onClick={() => handleDhalariSelect(dhalari)}
-                      >
-                        {dhalari.name}
+              </div>
+
+              {/* Rice Mill Details */}
+              <div className="bg-white p-4 rounded-lg shadow-sm space-y-3" ref={riceMillRef}>
+                <h3 className="text-sm font-medium text-gray-900">Rice Mill Details</h3>
+                <div className="space-y-2">
+                  <div className="relative">
+                    <input
+                      type="text"
+                      value={riceMillSearch}
+                      onChange={(e) => {
+                        setRiceMillSearch(e.target.value);
+                        setValue('riceMill.name', e.target.value);
+                      }}
+                      onFocus={() => setShowRiceMillDropdown(true)}
+                      onKeyDown={(e) => handleKeyDown(e, 'riceMill')}
+                      className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm"
+                      placeholder="Search or enter mill name"
+                    />
+                    {showRiceMillDropdown && riceMills && riceMills.length > 0 && (
+                      <div className="absolute z-10 mt-1 w-full bg-white shadow-lg rounded-md py-1 text-sm ring-1 ring-black ring-opacity-5 max-h-48 overflow-auto">
+                        {riceMills
+                          .filter(mill => mill.name.toLowerCase().includes(riceMillSearch.toLowerCase()))
+                          .map((mill) => (
+                            <div key={mill.id} className="px-3 py-2 hover:bg-gray-100 cursor-pointer" onClick={() => handleRiceMillSelect(mill)}>
+                              {mill.name}
+                            </div>
+                          ))
+                        }
                       </div>
-                    ))}
+                    )}
                   </div>
-                )}
+                  <div className="grid grid-cols-2 gap-2">
+                    <input {...register('riceMill.phone')} placeholder="Phone" className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm" />
+                    <input {...register('riceMill.contactPerson')} placeholder="Contact Person" className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm" />
+                    <input {...register('riceMill.location')} placeholder="Location" className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm" />
+                    <input {...register('riceMill.gst')} placeholder="GST" className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm" />
+                  </div>
+                </div>
               </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Rythu Name</label>
-                <input
-                  {...register('dhalariDetails.rythuName')}
-                  type="text"
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm bg-gray-50"
-                  readOnly
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Location</label>
-                <input
-                  {...register('dhalariDetails.location')}
-                  type="text"
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm bg-gray-50"
-                  readOnly
-                />
-              </div>
-            </div>
-          </div>
 
-   
-          {/* Loading Details */}
-          <div className="bg-white shadow px-4 py-5 sm:rounded-lg sm:p-6">
-            <h3 className="text-lg font-medium leading-6 text-gray-900 mb-4">Loading Details</h3>
-            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Per Bag</label>
-                <input
-                  {...register('loadingDetails.perBag')}
-                  type="number"
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                />
+              {/* Loading Details */}
+              <div className="bg-white p-4 rounded-lg shadow-sm space-y-3">
+                <h3 className="text-sm font-medium text-gray-900">Loading Details</h3>
+                <div className="grid grid-cols-2 gap-2">
+                  <input {...register('loadingDetails.perBag')} type="number" placeholder="Per Bag" className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm" />
+                  <input {...register('loadingDetails.deliveryType')} placeholder="Delivery Type" className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm" />
+                  <input {...register('loadingDetails.riceType')} placeholder="Rice Type" className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm" />
+                  <input {...register('loadingDetails.bagCount')} type="number" placeholder="Bag Count" className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm" />
+                  <input {...register('loadingDetails.waymentType')} placeholder="Wayment Type" className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm" />
+                  <input {...register('loadingDetails.loadingRate')} type="number" placeholder="Loading Rate" className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm" />
+                  <input {...register('loadingDetails.commission')} type="number" placeholder="Commission" className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm" />
+                  <input {...register('loadingDetails.totalRate')} type="number" placeholder="Total Rate" className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm" />
+                </div>
               </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Delivery Type</label>
-                <input
-                  {...register('loadingDetails.deliveryType')}
-                  type="text"
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Rice Type</label>
-                <input
-                  {...register('loadingDetails.riceType')}
-                  type="text"
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Bag Count</label>
-                <input
-                  {...register('loadingDetails.bagCount')}
-                  type="number"
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Wayment Type</label>
-                <input
-                  {...register('loadingDetails.waymentType')}
-                  type="text"
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Loading Rate</label>
-                <input
-                  {...register('loadingDetails.loadingRate')}
-                  type="number"
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Commission</label>
-                <input
-                  {...register('loadingDetails.commission')}
-                  type="number"
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Total Rate</label>
-                <input
-                  {...register('loadingDetails.totalRate')}
-                  type="number"
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                />
-              </div>
-            </div>
-          </div>
-          {/* Lorry Details */}
-          <div className="bg-white shadow px-4 py-5 sm:rounded-lg sm:p-6">
-            <h3 className="text-lg font-medium leading-6 text-gray-900 mb-4">Lorry Details</h3>
-            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Driver Name</label>
-                <input
-                  {...register('lorryDetails.driverName')}
-                  type="text"
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Driver Location</label>
-                <input
-                  {...register('lorryDetails.driverLocation')}
-                  type="text"
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Owner Name</label>
-                <input
-                  {...register('lorryDetails.ownerName')}
-                  type="text"
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Owner Location</label>
-                <input
-                  {...register('lorryDetails.ownerLocation')}
-                  type="text"
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Lorry Number</label>
-                <input
-                  {...register('lorryDetails.lorryNumber')}
-                  type="text"
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Driver Number</label>
-                <input
-                  {...register('lorryDetails.driverNumber')}
-                  type="text"
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                />
-              </div>
-            </div>
-          </div>
 
-          {/* Transport Offices */}
-          <div className="bg-white shadow px-4 py-5 sm:rounded-lg sm:p-6">
-            <h3 className="text-lg font-medium leading-6 text-gray-900 mb-4">Transport Office Details</h3>
-            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Name</label>
-                <input
-                  {...register('transportOffices.name')}
-                  type="text"
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Phone Number</label>
-                <input
-                  {...register('transportOffices.phoneNumber')}
-                  type="text"
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                />
+              {/* Weightage Details */}
+              <div className="bg-white p-4 rounded-lg shadow-sm space-y-3">
+                <h3 className="text-sm font-medium text-gray-900">Weightage Details</h3>
+                <div className="grid grid-cols-2 gap-2">
+                  <input {...register('weightageDetails.billNumber')} placeholder="Bill Number" className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm" />
+                  <input {...register('weightageDetails.type')} placeholder="Type" className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm" />
+                  <input {...register('weightageDetails.total')} type="number" placeholder="Total" className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm" />
+                  <input {...register('weightageDetails.empty')} type="number" placeholder="Empty" className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm" />
+                  <input {...register('weightageDetails.itemWeight')} type="number" placeholder="Item Weight" className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm" />
+                </div>
               </div>
             </div>
-          </div>
 
-          {/* Kirai Details */}
-          <div className="bg-white shadow px-4 py-5 sm:rounded-lg sm:p-6">
-            <h3 className="text-lg font-medium leading-6 text-gray-900 mb-4">Kirai Details</h3>
-            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Type</label>
-                <input
-                  {...register('kiraiDetails.type')}
-                  type="text"
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                />
+            {/* Right Column */}
+            <div className="space-y-4">
+              {/* Dhalari Details */}
+              <div className="bg-white p-4 rounded-lg shadow-sm space-y-3" ref={dhalariRef}>
+                <h3 className="text-sm font-medium text-gray-900">Dhalari Details</h3>
+                <div className="space-y-2">
+                  <div className="relative">
+                    <input
+                      type="text"
+                      value={dhalariSearch}
+                      onChange={(e) => {
+                        setDhalariSearch(e.target.value);
+                        setValue('dhalariDetails.name', e.target.value);
+                      }}
+                      onFocus={() => setShowDhalariDropdown(true)}
+                      onKeyDown={(e) => handleKeyDown(e, 'dhalari')}
+                      className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm"
+                      placeholder="Search or enter dhalari name"
+                    />
+                    {showDhalariDropdown && dhalariList && dhalariList.length > 0 && (
+                      <div className="absolute z-10 mt-1 w-full bg-white shadow-lg rounded-md py-1 text-sm ring-1 ring-black ring-opacity-5 max-h-48 overflow-auto">
+                        {dhalariList
+                          .filter(dhalari => dhalari.name.toLowerCase().includes(dhalariSearch.toLowerCase()))
+                          .map((dhalari) => (
+                            <div key={dhalari.id} className="px-3 py-2 hover:bg-gray-100 cursor-pointer" onClick={() => handleDhalariSelect(dhalari)}>
+                              {dhalari.name}
+                            </div>
+                          ))
+                        }
+                      </div>
+                    )}
+                  </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    <input {...register('dhalariDetails.rythuName')} placeholder="Rythu Name" className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm" />
+                    <input {...register('dhalariDetails.location')} placeholder="Location" className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm" />
+                  </div>
+                </div>
               </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Per Ton</label>
-                <input
-                  {...register('kiraiDetails.perTon')}
-                  type="number"
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Advance</label>
-                <input
-                  {...register('kiraiDetails.advance')}
-                  type="number"
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Balance</label>
-                <input
-                  {...register('kiraiDetails.balance')}
-                  type="text"
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Driver Allowances</label>
-                <input
-                  {...register('kiraiDetails.driverAllowances')}
-                  type="number"
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                />
-              </div>
-            </div>
-          </div>
 
-          {/* Weightage Details */}
-          <div className="bg-white shadow px-4 py-5 sm:rounded-lg sm:p-6">
-            <h3 className="text-lg font-medium leading-6 text-gray-900 mb-4">Weightage Details</h3>
-            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-              <div>
-                <label className="block text-sm font-medium text-gray-700">ID</label>
-                <input
-                  {...register('weightageDetails.id')}
-                  type="text"
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                />
+              {/* Lorry Details */}
+              <div className="bg-white p-4 rounded-lg shadow-sm space-y-3">
+                <h3 className="text-sm font-medium text-gray-900">Lorry Details</h3>
+                <div className="grid grid-cols-2 gap-2">
+                  <input {...register('lorryDetails.driverName')} placeholder="Driver Name" className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm" />
+                  <input {...register('lorryDetails.driverLocation')} placeholder="Driver Location" className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm" />
+                  <input {...register('lorryDetails.ownerName')} placeholder="Owner Name" className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm" />
+                  <input {...register('lorryDetails.ownerLocation')} placeholder="Owner Location" className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm" />
+                  <input {...register('lorryDetails.lorryNumber')} placeholder="Lorry Number" className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm" />
+                  <input {...register('lorryDetails.driverNumber')} placeholder="Driver Number" className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm" />
+                </div>
               </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Bill Number</label>
-                <input
-                  {...register('weightageDetails.billNumber')}
-                  type="text"
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Type</label>
-                <input
-                  {...register('weightageDetails.type')}
-                  type="text"
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Total Weight</label>
-                <input
-                  {...register('weightageDetails.total')}
-                  type="number"
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Empty Weight</label>
-                <input
-                  {...register('weightageDetails.empty')}
-                  type="number"
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Item Weight</label>
-                <input
-                  {...register('weightageDetails.itemWeight')}
-                  type="number"
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                />
-              </div>
-            </div>
-          </div>
-          
-             {/* Notes & Instructions */}
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Notes</label>
-                <textarea
+              {/* Kirai Details */}
+              <div className="bg-white p-4 rounded-lg shadow-sm space-y-3">
+                <h3 className="text-sm font-medium text-gray-900">Kirai Details</h3>
+                <div className="grid grid-cols-2 gap-2">
+                  <input {...register('kiraiDetails.type')} placeholder="Type" className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm" />
+                  <input {...register('kiraiDetails.perTon')} type="number" placeholder="Per Ton" className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm" />
+                  <input {...register('kiraiDetails.advance')} type="number" placeholder="Advance" className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm" />
+                  <input {...register('kiraiDetails.balance')} placeholder="Balance" className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm" />
+                  <input {...register('kiraiDetails.driverAllowances')} type="number" placeholder="Driver Allowances" className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm" />
+                </div>
+              </div>
+
+
+
+              {/* Notes & Instructions */}
+
+              <div className="flex items-center space-x-2">
+                <label className="text-sm font-medium text-gray-700 whitespace-nowrap">Notes :</label>
+                <input
                   {...register('notes')}
-                  rows={3}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                  type="text"
+                  className="flex-1 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm"
                 />
               </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Instructions</label>
-                <textarea
+              <div className="flex items-center space-x-2">
+                <label className="text-sm font-medium text-gray-700 whitespace-nowrap">Instructions :</label>
+                <input
                   {...register('instructions')}
-                  rows={3}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                  type="text"
+                  className="flex-1 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm"
                 />
               </div>
-          <div className="flex justify-end">
-            <button
-              type="button"
-              onClick={() => navigate('/dashboard')}
-              className="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 mr-3"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-            >
-              Save
-            </button>
+
+              {/* Buttons */}
+              <div className="flex justify-end">
+                <button type="button" onClick={() => navigate('/dashboard')} className="mr-3 px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
+                  Cancel
+                </button>
+                <button type="submit" className="px-4 py-2 border border-transparent rounded-md text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700">
+                  Save
+                </button>
+              </div>
+            </div>
           </div>
         </form>
-      </div>
-    </div>
+      </div >
+    </div >
   );
 }
