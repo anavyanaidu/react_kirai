@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
-import { Lock, Mail } from 'lucide-react';
+import { Eye, EyeOff, Lock, Mail } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { login } from '../services/api';
 
@@ -19,6 +19,12 @@ export default function LoginForm() {
     } catch (error) {
       toast.error('Login failed. Please check your credentials.');
     }
+  };
+
+  const [showPassword, setShowPassword] = useState(false); // State to toggle password visibility
+
+  const togglePasswordVisibility = () => {
+    setShowPassword((prev) => !prev); // Toggle the state
   };
 
   return (
@@ -47,20 +53,31 @@ export default function LoginForm() {
               {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email.message as string}</p>}
             </div>
             <div>
-              <label htmlFor="password" className="sr-only">Password</label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Lock className="h-5 w-5 text-gray-400" />
-                </div>
-                <input
-                  {...register('password', { required: 'Password is required' })}
-                  type="password"
-                  className="appearance-none rounded-none relative block w-full px-3 py-2 pl-10 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-                  placeholder="Password"
-                />
-              </div>
-              {errors.password && <p className="text-red-500 text-xs mt-1">{errors.password.message as string}</p>}
-            </div>
+      <label htmlFor="password" className="sr-only">Password</label>
+      <div className="relative">
+        {/* Lock Icon */}
+        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+          <Lock className="h-5 w-5 text-gray-400" />
+        </div>
+
+        {/* Password Input */}
+        <input
+          {...register('password', { required: 'Password is required' })}
+          type={showPassword ? 'text' : 'password'} // Toggle between 'text' and 'password'
+          className="appearance-none rounded-none relative block w-full px-3 py-2 pl-10 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+          placeholder="Password"
+        />
+
+        {/* Password Toggle Icon */}
+        <div
+          className="absolute inset-y-0 right-0 pr-3 flex items-center cursor-pointer"
+          onClick={togglePasswordVisibility} // Toggle password visibility on click
+        >
+          {showPassword ? <EyeOff className="h-5 w-5 text-gray-400" /> : <Eye className="h-5 w-5 text-gray-400" />}
+        </div>
+      </div>
+      {errors.password && <p className="text-red-500 text-xs mt-1">{errors.password.message as string}</p>}
+    </div>
           </div>
 
           <div>

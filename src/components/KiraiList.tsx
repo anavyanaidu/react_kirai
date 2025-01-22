@@ -7,7 +7,7 @@ import { KiraiDetails } from '../types';
 
 const searchFields = [
   { label: 'KL Number', value: '_id' },
-  { label: 'Rice Mill Name', value: 'ricemill.name' },
+  { label: 'Rice Mill Name', value: 'riceMill.name' },
   { label: 'Dhalari Name', value: 'dhalariDetails.name' }
 ];
 
@@ -32,7 +32,7 @@ export default function KiraiList() {
   );
 
   // Query for search results
-  const { data: searchResults, isLoading: isLoadingSearch } = useQuery(
+  const { data: searchResults, isLoading: isLoadingSearch, refetch: refetchSearchResults } = useQuery(
     ['kiraiSearch', selectedField, searchValue],
     () => filterKiraiDetails(selectedField, searchValue),
     {
@@ -43,7 +43,7 @@ export default function KiraiList() {
   const handleSearch = () => {
     if (searchValue) {
       setIsSearching(true);
-      searchResults.refetch();
+      refetchSearchResults();
     } else {
       setIsSearching(false);
     }

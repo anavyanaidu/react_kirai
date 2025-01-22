@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { KiraiDetails, LoginResponse } from '../types';
+import { DhalariDetails, KiraiDetails, LoginResponse, RiceMill } from '../types';
 
 const api = axios.create({
   baseURL: 'http://localhost:8009',
@@ -44,16 +44,12 @@ export const getAllKiraiDetails = async (params: {
 };
 
 export const getAllRiceMills = async (search?: string): Promise<RiceMill[]> => {
-  const response = await api.get('/v1/kirai/getAllRiceMills', {
-    params: { search }
-  });
+  const response = await api.get('/v1/kirai/getAllRiceMills');
   return response.data;
 };
 
 export const getAllDhalariDetails = async (search?: string): Promise<DhalariDetails[]> => {
-  const response = await api.get('/v1/kirai/getAllDhalariDetails', {
-    params: { search }
-  });
+  const response = await api.get('/v1/kirai/getAllDhalariDetails');
   return response.data;
 };
 
