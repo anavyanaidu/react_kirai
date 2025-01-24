@@ -117,42 +117,66 @@ export default function KiraiForm() {
 
               {/* Rice Mill Details */}
               <div className="bg-white p-4 rounded-lg shadow-sm space-y-3" ref={riceMillRef}>
-                <h3 className="text-sm font-medium text-gray-900">Rice Mill Details</h3>
-                <div className="space-y-2">
-                  <div className="relative">
-                    <input
-                      type="text"
-                      value={riceMillSearch}
-                      onChange={(e) => {
-                        setRiceMillSearch(e.target.value);
-                        setValue('riceMill.name', e.target.value);
-                      }}
-                      onFocus={() => setShowRiceMillDropdown(true)}
-                      onKeyDown={(e) => handleKeyDown(e, 'riceMill')}
-                      className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm"
-                      placeholder="Search or enter mill name"
-                    />
-                    {showRiceMillDropdown && riceMills && riceMills.length > 0 && (
-                      <div className="absolute z-10 mt-1 w-full bg-white shadow-lg rounded-md py-1 text-sm ring-1 ring-black ring-opacity-5 max-h-48 overflow-auto">
-                        {riceMills
-                          .filter(mill => mill.name.toLowerCase().includes(riceMillSearch.toLowerCase()))
-                          .map((mill) => (
-                            <div key={mill.id} className="px-3 py-2 hover:bg-gray-100 cursor-pointer" onClick={() => handleRiceMillSelect(mill)}>
-                              {mill.name}
-                            </div>
-                          ))
-                        }
-                      </div>
-                    )}
-                  </div>
-                  <div className="grid grid-cols-2 gap-2">
-                    <input {...register('riceMill.phone')} placeholder="Phone" className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm" />
-                    <input {...register('riceMill.contactPerson')} placeholder="Contact Person" className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm" />
-                    <input {...register('riceMill.location')} placeholder="Location" className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm" />
-                    <input {...register('riceMill.gst')} placeholder="GST" className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm" />
-                  </div>
-                </div>
+  <h3 className="text-sm font-medium text-gray-900">Rice Mill Details</h3>
+  <div className="space-y-2">
+    <div className="relative">
+      <input
+        type="text"
+        value={riceMillSearch}
+        onChange={(e) => {
+          setRiceMillSearch(e.target.value);
+          setValue('riceMill.name', e.target.value);
+        }}
+        onFocus={() => setShowRiceMillDropdown(true)}
+        onKeyDown={(e) => handleKeyDown(e, 'riceMill')}
+        className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm"
+        placeholder="Search or enter mill name"
+      />
+      {showRiceMillDropdown && riceMills && riceMills.length > 0 && (
+        <div className="absolute z-10 mt-1 w-full bg-white shadow-lg rounded-md py-1 text-sm ring-1 ring-black ring-opacity-5 max-h-48 overflow-auto">
+          {riceMills
+            .filter(mill => 
+              // Ensure mill.name exists before calling toLowerCase
+              mill.name?.toLowerCase().includes(riceMillSearch.toLowerCase())
+            )
+            .map((mill) => (
+              <div 
+                key={mill.id} 
+                className="px-3 py-2 hover:bg-gray-100 cursor-pointer" 
+                onClick={() => handleRiceMillSelect(mill)}
+              >
+                {mill.name || "Unnamed Mill"} {/* Fallback for null or undefined names */}
               </div>
+            ))
+          }
+        </div>
+      )}
+    </div>
+    <div className="grid grid-cols-2 gap-2">
+      <input 
+        {...register('riceMill.phone')} 
+        placeholder="Phone" 
+        className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm" 
+      />
+      <input 
+        {...register('riceMill.contactPerson')} 
+        placeholder="Contact Person" 
+        className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm" 
+      />
+      <input 
+        {...register('riceMill.location')} 
+        placeholder="Location" 
+        className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm" 
+      />
+      <input 
+        {...register('riceMill.gst')} 
+        placeholder="GST" 
+        className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm" 
+      />
+    </div>
+  </div>
+</div>
+
 
               {/* Loading Details */}
               <div className="bg-white p-4 rounded-lg shadow-sm space-y-3">
@@ -185,41 +209,58 @@ export default function KiraiForm() {
             {/* Right Column */}
             <div className="space-y-4">
               {/* Dhalari Details */}
-              <div className="bg-white p-4 rounded-lg shadow-sm space-y-3" ref={dhalariRef}>
-                <h3 className="text-sm font-medium text-gray-900">Dhalari Details</h3>
-                <div className="space-y-2">
-                  <div className="relative">
-                    <input
-                      type="text"
-                      value={dhalariSearch}
-                      onChange={(e) => {
-                        setDhalariSearch(e.target.value);
-                        setValue('dhalariDetails.name', e.target.value);
-                      }}
-                      onFocus={() => setShowDhalariDropdown(true)}
-                      onKeyDown={(e) => handleKeyDown(e, 'dhalari')}
-                      className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm"
-                      placeholder="Search or enter dhalari name"
-                    />
-                    {showDhalariDropdown && dhalariList && dhalariList.length > 0 && (
-                      <div className="absolute z-10 mt-1 w-full bg-white shadow-lg rounded-md py-1 text-sm ring-1 ring-black ring-opacity-5 max-h-48 overflow-auto">
-                        {dhalariList
-                          .filter(dhalari => dhalari.name.toLowerCase().includes(dhalariSearch.toLowerCase()))
-                          .map((dhalari) => (
-                            <div key={dhalari.id} className="px-3 py-2 hover:bg-gray-100 cursor-pointer" onClick={() => handleDhalariSelect(dhalari)}>
-                              {dhalari.name}
-                            </div>
-                          ))
-                        }
-                      </div>
-                    )}
-                  </div>
-                  <div className="grid grid-cols-2 gap-2">
-                    <input {...register('dhalariDetails.rythuName')} placeholder="Rythu Name" className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm" />
-                    <input {...register('dhalariDetails.location')} placeholder="Location" className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm" />
-                  </div>
+  {/* Dhalari Details */}
+  <div className="bg-white p-4 rounded-lg shadow-sm space-y-3" ref={dhalariRef}>
+    <h3 className="text-sm font-medium text-gray-900">Dhalari Details</h3>
+    <div className="space-y-2">
+      <div className="relative">
+        <input
+          type="text"
+          value={dhalariSearch}
+          onChange={(e) => {
+            setDhalariSearch(e.target.value);
+            setValue('dhalariDetails.name', e.target.value);
+          }}
+          onFocus={() => setShowDhalariDropdown(true)}
+          onKeyDown={(e) => handleKeyDown(e, 'dhalari')}
+          className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm"
+          placeholder="Search or enter dhalari name"
+        />
+        {showDhalariDropdown && dhalariList && dhalariList.length > 0 && (
+          <div className="absolute z-10 mt-1 w-full bg-white shadow-lg rounded-md py-1 text-sm ring-1 ring-black ring-opacity-5 max-h-48 overflow-auto">
+            {dhalariList
+              .filter(dhalari => 
+                // Ensure the name is not null or undefined before calling toLowerCase
+                dhalari.name?.toLowerCase().includes(dhalariSearch.toLowerCase())
+              )
+              .map((dhalari) => (
+                <div 
+                  key={dhalari.id} 
+                  className="px-3 py-2 hover:bg-gray-100 cursor-pointer" 
+                  onClick={() => handleDhalariSelect(dhalari)}
+                >
+                  {dhalari.name || "Unnamed"} {/* Fallback for null or undefined names */}
                 </div>
-              </div>
+              ))
+            }
+          </div>
+        )}
+      </div>
+      <div className="grid grid-cols-2 gap-2">
+        <input 
+          {...register('dhalariDetails.rythuName')} 
+          placeholder="Rythu Name" 
+          className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm" 
+        />
+        <input 
+          {...register('dhalariDetails.location')} 
+          placeholder="Location" 
+          className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm" 
+        />
+      </div>
+    </div>
+  </div>
+
 
               {/* Lorry Details */}
               <div className="bg-white p-4 rounded-lg shadow-sm space-y-3">

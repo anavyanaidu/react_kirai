@@ -202,119 +202,193 @@ export default function KiraiList() {
     }
   };
 
-  const KiraiDetailsView = ({ selectedKirai }: { selectedKirai: any }) => {
+  // const KiraiDetailsView = ({ selectedKirai }: { selectedKirai: any }) => {
+  //   return (
+  //     <div className="p-6 bg-white rounded-lg shadow-lg max-w-5xl mx-auto">
+  //       {/* Header Section */}
+  //       <div className="header mb-6">
+  //         <div className="flex justify-between items-center">
+  //           <div>
+  //             <div className="detail-row mb-2">
+  //               <span className="font-bold text-gray-700">KL No:</span>
+  //               <span className="ml-2">{selectedKirai.klno || 'N/A'}</span>
+  //             </div>
+  //             <div className="detail-row">
+  //               <span className="font-bold text-gray-700">Rice Mill Name:</span>
+  //               <span className="ml-2">{selectedKirai.riceMill.name || 'N/A'}</span>
+  //             </div>
+  //           </div>
+  //           <div>
+  //             <div className="detail-row">
+  //               <span className="font-bold text-gray-700">Date:</span>
+  //               <span className="ml-2">{selectedKirai.loadingDate || 'N/A'}</span>
+  //             </div>
+  //           </div>
+  //         </div>
+  //       </div>
+  
+  //       {/* Details Section */}
+  //       <div className="flex">
+  //         {/* Left Column */}
+  //         <div className="w-1/2 pr-8">
+  //           <div className="detail-row mb-2">
+  //             <span className="font-bold text-gray-700">1. Waybill No:</span>
+  //             <span className="ml-2">10</span>
+  //           </div>
+  //           <div className="detail-row mb-2">
+  //             <span className="font-bold text-gray-700">2. Asami Name:</span>
+  //             <span className="ml-2">{selectedKirai.dhalariDetails.rythuName || 'N/A'}</span>
+  //           </div>
+  //           <div className="detail-row mb-2">
+  //             <span className="font-bold text-gray-700">3. Dhalari Details:</span>
+  //             <span className="ml-2">
+  //               {selectedKirai.dhalariDetails.name || 'N/A'}, {selectedKirai.dhalariDetails.location || 'N/A'}
+  //             </span>
+  //           </div>
+  //           <div className="detail-row mb-2">
+  //             <span className="font-bold text-gray-700">4. Rice Type:</span>
+  //             <span className="ml-2">{selectedKirai.loadingDetails.riceType || 'N/A'}</span>
+  //           </div>
+  //           <div className="detail-row mb-2">
+  //             <span className="font-bold text-gray-700">5. Bag Count:</span>
+  //             <span className="ml-2">{selectedKirai.loadingDetails.bagCount || 'N/A'}</span>
+  //           </div>
+  //           <div className="detail-row mb-2">
+  //             <span className="font-bold text-gray-700">6. Wayment Type:</span>
+  //             <span className="ml-2">{selectedKirai.loadingDetails.waymentType || 'N/A'}</span>
+  //           </div>
+  //           <div className="detail-row mb-2">
+  //             <span className="font-bold text-gray-700">7. Lorry No:</span>
+  //             <span className="ml-2">{selectedKirai.lorryDetails.lorryNumber || 'N/A'}</span>
+  //           </div>
+  //           <div className="detail-row mb-2">
+  //             <span className="font-bold text-gray-700">8. Lorry Owner:</span>
+  //             <span className="ml-2">
+  //               {selectedKirai.lorryDetails.ownerName || 'N/A'}, {selectedKirai.lorryDetails.ownerLocation || 'N/A'}
+  //             </span>
+  //           </div>
+  //           <div className="detail-row mb-2">
+  //             <span className="font-bold text-gray-700">9. Lorry Driver:</span>
+  //             <span className="ml-2">
+  //               {selectedKirai.lorryDetails.driverName || 'N/A'}, {selectedKirai.lorryDetails.driverLocation || 'N/A'},{' '}
+  //               {selectedKirai.lorryDetails.driverNumber || 'N/A'}
+  //             </span>
+  //           </div>
+  //         </div>
+  
+  //         {/* Right Column */}
+  //         <div className="w-1/2 pl-8">
+  //           <div className="detail-row mb-2">
+  //             <span className="font-bold text-gray-700">10. Per Ton:</span>
+  //             <span className="ml-2">{selectedKirai.kiraiDetails.perTon || 'N/A'}</span>
+  //           </div>
+  //           <div className="detail-row mb-2">
+  //             <span className="font-bold text-gray-700">11. Advance:</span>
+  //             <span className="ml-2">{selectedKirai.kiraiDetails.advance || 'N/A'}</span>
+  //           </div>
+  //           <div className="detail-row mb-2">
+  //             <span className="font-bold text-gray-700">12. Balance:</span>
+  //             <span className="ml-2">{selectedKirai.kiraiDetails.balance || 'N/A'}</span>
+  //           </div>
+  //           <div className="detail-row mb-2">
+  //             <span className="font-bold text-gray-700">13. Total:</span>
+  //             <span className="ml-2">{selectedKirai.weightageDetails.total || 'N/A'}</span>
+  //           </div>
+  //           <div className="detail-row mb-2">
+  //             <span className="font-bold text-gray-700">14. Empty:</span>
+  //             <span className="ml-2">{selectedKirai.weightageDetails.empty || 'N/A'}</span>
+  //           </div>
+  //           <div className="detail-row mb-2">
+  //             <span className="font-bold text-gray-700">15. Item Weight:</span>
+  //             <span className="ml-2">{selectedKirai.weightageDetails.itemWeight || 'N/A'}</span>
+  //           </div>
+  //           <div className="detail-row mb-2">
+  //             <span className="font-bold text-gray-700">16. Commission:</span>
+  //             <span className="ml-2">{selectedKirai.loadingDetails.commission || 'N/A'}</span>
+  //           </div>
+  //           <div className="detail-row mb-2">
+  //             <span className="font-bold text-gray-700">17. Total Rate:</span>
+  //             <span className="ml-2">{selectedKirai.loadingDetails.totalRate || 'N/A'}</span>
+  //           </div>
+  //         </div>
+  //       </div>
+  //     </div>
+  //   );
+  // };
+  const KiraiDetailsLayout = ({ selectedKirai }: { selectedKirai: any }) => {
     return (
-      <div className="p-6 bg-white rounded-lg shadow-lg max-w-5xl mx-auto">
+      <div style={{ fontFamily: 'Arial, sans-serif', padding: '20px', lineHeight: '1.6' }}>
         {/* Header Section */}
         <div className="header mb-6">
-          <div className="flex justify-between items-center">
+          <div className="flex justify-between">
             <div>
-              <div className="detail-row mb-2">
-                <span className="font-bold text-gray-700">KL No:</span>
-                <span className="ml-2">{selectedKirai.klno || 'N/A'}</span>
+              <div className="font-bold text-lg">
+                KL No: <span className="font-normal">{selectedKirai.klno || 'N/A'}</span>
               </div>
-              <div className="detail-row">
-                <span className="font-bold text-gray-700">Rice Mill Name:</span>
-                <span className="ml-2">{selectedKirai.riceMill.name || 'N/A'}</span>
+              <div className="font-bold text-lg">
+                Rice Mill Name: <span className="font-normal">{selectedKirai.riceMill?.name || 'N/A'}</span>
               </div>
             </div>
-            <div>
-              <div className="detail-row">
-                <span className="font-bold text-gray-700">Date:</span>
-                <span className="ml-2">{selectedKirai.loadingDate || 'N/A'}</span>
+            <div className="text-right">
+              <div className="font-bold text-lg">
+                Date: <span className="font-normal">{selectedKirai.loadingDate || 'N/A'}</span>
               </div>
             </div>
           </div>
         </div>
   
         {/* Details Section */}
-        <div className="flex">
+        <div className="grid grid-cols-2 gap-6">
           {/* Left Column */}
-          <div className="w-1/2 pr-8">
-            <div className="detail-row mb-2">
-              <span className="font-bold text-gray-700">1. Waybill No:</span>
-              <span className="ml-2">10</span>
-            </div>
-            <div className="detail-row mb-2">
-              <span className="font-bold text-gray-700">2. Asami Name:</span>
-              <span className="ml-2">{selectedKirai.dhalariDetails.rythuName || 'N/A'}</span>
-            </div>
-            <div className="detail-row mb-2">
-              <span className="font-bold text-gray-700">3. Dhalari Details:</span>
-              <span className="ml-2">
-                {selectedKirai.dhalariDetails.name || 'N/A'}, {selectedKirai.dhalariDetails.location || 'N/A'}
-              </span>
-            </div>
-            <div className="detail-row mb-2">
-              <span className="font-bold text-gray-700">4. Rice Type:</span>
-              <span className="ml-2">{selectedKirai.loadingDetails.riceType || 'N/A'}</span>
-            </div>
-            <div className="detail-row mb-2">
-              <span className="font-bold text-gray-700">5. Bag Count:</span>
-              <span className="ml-2">{selectedKirai.loadingDetails.bagCount || 'N/A'}</span>
-            </div>
-            <div className="detail-row mb-2">
-              <span className="font-bold text-gray-700">6. Wayment Type:</span>
-              <span className="ml-2">{selectedKirai.loadingDetails.waymentType || 'N/A'}</span>
-            </div>
-            <div className="detail-row mb-2">
-              <span className="font-bold text-gray-700">7. Lorry No:</span>
-              <span className="ml-2">{selectedKirai.lorryDetails.lorryNumber || 'N/A'}</span>
-            </div>
-            <div className="detail-row mb-2">
-              <span className="font-bold text-gray-700">8. Lorry Owner:</span>
-              <span className="ml-2">
-                {selectedKirai.lorryDetails.ownerName || 'N/A'}, {selectedKirai.lorryDetails.ownerLocation || 'N/A'}
-              </span>
-            </div>
-            <div className="detail-row mb-2">
-              <span className="font-bold text-gray-700">9. Lorry Driver:</span>
-              <span className="ml-2">
-                {selectedKirai.lorryDetails.driverName || 'N/A'}, {selectedKirai.lorryDetails.driverLocation || 'N/A'},{' '}
-                {selectedKirai.lorryDetails.driverNumber || 'N/A'}
-              </span>
-            </div>
+          <div>
+            {[
+              ['1. Waybill No', '10'],
+              ['2. Asami Name', selectedKirai.dhalariDetails?.rythuName || 'N/A'],
+              [
+                '3. Dhalari Details',
+                `${selectedKirai.dhalariDetails?.name || 'N/A'}, ${selectedKirai.dhalariDetails?.location || 'N/A'}`,
+              ],
+              ['4. Rice Type', selectedKirai.loadingDetails?.riceType || 'N/A'],
+              ['5. Bag Count', selectedKirai.loadingDetails?.bagCount || 'N/A'],
+              ['6. Wayment Type', selectedKirai.loadingDetails?.waymentType || 'N/A'],
+              ['7. Lorry No', selectedKirai.lorryDetails?.lorryNumber || 'N/A'],
+              [
+                '8. Lorry Owner',
+                `${selectedKirai.lorryDetails?.ownerName || 'N/A'}, ${selectedKirai.lorryDetails?.ownerLocation || 'N/A'}`,
+              ],
+              [
+                '9. Lorry Driver',
+                `${selectedKirai.lorryDetails?.driverName || 'N/A'}, ${selectedKirai.lorryDetails?.driverLocation || 'N/A'}, ${selectedKirai.lorryDetails?.driverNumber || 'N/A'}`,
+              ],
+            ].map(([label, value], index) => (
+              <div key={index} className="mb-2">
+                <span className="font-bold">{label}:</span> <span>{value}</span>
+              </div>
+            ))}
           </div>
   
           {/* Right Column */}
-          <div className="w-1/2 pl-8">
-            <div className="detail-row mb-2">
-              <span className="font-bold text-gray-700">10. Per Ton:</span>
-              <span className="ml-2">{selectedKirai.kiraiDetails.perTon || 'N/A'}</span>
-            </div>
-            <div className="detail-row mb-2">
-              <span className="font-bold text-gray-700">11. Advance:</span>
-              <span className="ml-2">{selectedKirai.kiraiDetails.advance || 'N/A'}</span>
-            </div>
-            <div className="detail-row mb-2">
-              <span className="font-bold text-gray-700">12. Balance:</span>
-              <span className="ml-2">{selectedKirai.kiraiDetails.balance || 'N/A'}</span>
-            </div>
-            <div className="detail-row mb-2">
-              <span className="font-bold text-gray-700">13. Total:</span>
-              <span className="ml-2">{selectedKirai.weightageDetails.total || 'N/A'}</span>
-            </div>
-            <div className="detail-row mb-2">
-              <span className="font-bold text-gray-700">14. Empty:</span>
-              <span className="ml-2">{selectedKirai.weightageDetails.empty || 'N/A'}</span>
-            </div>
-            <div className="detail-row mb-2">
-              <span className="font-bold text-gray-700">15. Item Weight:</span>
-              <span className="ml-2">{selectedKirai.weightageDetails.itemWeight || 'N/A'}</span>
-            </div>
-            <div className="detail-row mb-2">
-              <span className="font-bold text-gray-700">16. Commission:</span>
-              <span className="ml-2">{selectedKirai.loadingDetails.commission || 'N/A'}</span>
-            </div>
-            <div className="detail-row mb-2">
-              <span className="font-bold text-gray-700">17. Total Rate:</span>
-              <span className="ml-2">{selectedKirai.loadingDetails.totalRate || 'N/A'}</span>
-            </div>
+          <div>
+            {[
+              ['10. Per Ton', selectedKirai.kiraiDetails?.perTon || 'N/A'],
+              ['11. Advance', selectedKirai.kiraiDetails?.advance || 'N/A'],
+              ['12. Balance', selectedKirai.kiraiDetails?.balance || 'N/A'],
+              ['13. Total', selectedKirai.weightageDetails?.total || 'N/A'],
+              ['14. Empty', selectedKirai.weightageDetails?.empty || 'N/A'],
+              ['15. Item Weight', selectedKirai.weightageDetails?.itemWeight || 'N/A'],
+              ['16. Commission', selectedKirai.loadingDetails?.commission || 'N/A'],
+              ['17. Total Rate', selectedKirai.loadingDetails?.totalRate || 'N/A'],
+            ].map(([label, value], index) => (
+              <div key={index} className="mb-2">
+                <span className="font-bold">{label}:</span> <span>{value}</span>
+              </div>
+            ))}
           </div>
         </div>
       </div>
     );
   };
+  
   
   
   
@@ -507,9 +581,9 @@ export default function KiraiList() {
                   Close
                 </button>
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <KiraiDetailsView selectedKirai={selectedKirai} />
-              </div>
+             
+                <KiraiDetailsLayout selectedKirai={selectedKirai} />
+              
             </div>
           </div>
         )}
